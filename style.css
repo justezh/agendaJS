@@ -1,0 +1,198 @@
+/* ====== GERAL ====== */
+body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background-color: #2e2d2d;
+    /* fundo preto suave */
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    color: #eaeaea;
+    /* texto claro para contraste */
+    padding: 20px;
+}
+
+h1 {
+    margin-bottom: 15px;
+    color: #ffffff;
+    /* branco puro */
+}
+
+h2 {
+    margin-top: 20px;
+    font-size: 18px;
+    color: #cccccc;
+    /* cinza claro */
+}
+
+/* ====== FORMULÁRIOS ====== */
+input[type="text"],
+input[type="date"] {
+    padding: 10px;
+    margin-right: 5px;
+    border-radius: 6px;
+    border: 1px solid #444;
+    background-color: #1e1e1e;
+    /* fundo escuro */
+    color: #f5f5f5;
+    outline: none;
+    transition: border 0.2s;
+}
+
+input[type="text"]:focus,
+input[type="date"]:focus {
+    border: 1px solid #51b486;
+}
+
+button {
+    padding: 8px 14px;
+    border: none;
+    border-radius: 6px;
+    background-color: #333333;
+    /* cinza escuro */
+    color: #f5f5f5;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.2s;
+}
+
+button:hover {
+    background-color: #555555;
+    /* tom cinza mais claro */
+}
+
+/* ====== LISTAS ====== */
+#lista-de-tarefas,
+#lista-lixeira {
+    margin-top: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: center;
+    width: 100%;
+}
+
+/* ====== CARD ====== */
+.card {
+    background: #232222;
+    /* fundo do card em cinza escuro */
+    border-radius: 10px;
+    box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.6);
+    padding: 15px;
+    width: 250px;
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.8);
+}
+
+/* ====== CONTEÚDO DO CARD ====== */
+.titulo {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #f0f0f0;
+}
+
+.data {
+    font-size: 14px;
+    color: #bbbbbb;
+}
+
+.data.atrasada {
+    color: #c2695f;
+    font-weight: bold;
+}
+
+.titulo.concluida {
+    text-decoration: line-through;
+    color: #777;
+}
+
+.fim-de-semana {
+    color: #e57373;
+    font-weight: bold;
+}
+
+/* ====== BOTÕES DO CARD ====== */
+.card button {
+    margin-top: 8px;
+    margin-right: 5px;
+    font-size: 12px;
+    padding: 6px 10px;
+    border-radius: 5px;
+    color: #fff;
+}
+
+/* nova paleta dark para os botões */
+.card button:nth-child(1) {
+    background: #444444;
+}
+
+.card button:nth-child(1):hover {
+    background: #666666;
+}
+
+.card button:nth-child(2) {
+    background: #555555;
+}
+
+.card button:nth-child(2):hover {
+    background: #777777;
+}
+
+.card button:nth-child(3) {
+    background: #666666;
+}
+
+.card button:nth-child(3):hover {
+    background: #888888;
+}
+
+/* ====== LIXEIRA ====== */
+#lixeira {
+    margin-top: 40px;
+    width: 100%;
+    border-top: 1px solid #444;
+    padding-top: 20px;
+    display: flex;
+
+}
+
+#lixeira h2 {
+    color: #ff6b6b;
+    /* destaque em vermelho suave */
+    text-align: center;
+}
+
+#lista-lixeira .card {
+    background: #1a1a1a;
+    /* mais escuro para diferenciar da lista normal */
+    border: 1px dashed #555;
+}
+
+#lista-lixeira .card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0px 4px 10px rgba(255, 0, 0, 0.3);
+}
+
+mark {
+    background-color: #fa0000;
+    display: inline-block;   /* vira bloco para aceitar largura/altura */
+    margin-top: 15px;
+    width: 60px;
+    height: 50px;            /* corrigido */
+    text-align:end;      /* centraliza o texto dentro */
+    line-height: 50px;       /* alinha o texto verticalmente */
+    border-radius: 6px;      /* opcional: deixa cantos arredondados */
+    color: #fff;             /* texto branco para contraste */
+    font-weight: bold;
+}

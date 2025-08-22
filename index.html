@@ -4,37 +4,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <link rel="stylesheet" href="style.css">
     <title>Agenda</title>
 </head>
 
 <body>
+    <h1>Tarefas Tarefosas</h1>
+
+    <!-- entrada de nova tarefa -->
     <input id="tarefa" type="text" placeholder="Insira aqui sua tarefa"></input>
     <input id="seleciona-data" type="date" />
     <button onclick="adicionarTarefa()">Adicionar Tarefa</button>
+
+    <!-- filtros -->
+    <div style="margin-top: 15px;">
+        <button onclick="filtroStatus('todas')">Todas</button>
+        <button onclick="filtroStatus('pendentes')">Pendentes</button>
+        <button onclick="filtroStatus('concluidas')">Concluídas</button>
+    </div>
+
+    <!-- resumo semanal -->
+    <h2 id="resumo-semanal"></h2>
+
+    <!-- lista de tarefas -->
     <div id="lista-de-tarefas"></div>
 
+    <!-- lixeira -->
+    <mark><h2>Lixeira</h2></mark>
+    <div id="lixeira"></div>
+
     <script>
-        
         let afazeres = JSON.parse(localStorage.getItem("afazeres")) || [
-            { nome: "Lavar louça", data: "2025-08-15", id: "id1" },
-            { nome: "Lavar banheiro", data: "2025-08-20", id: "id2" },
-            { nome: "Estender roupa", data: "2025-08-25", id: "id3" },
-            { nome: "Assistir o jogo do Corinthians", data: "2025-08-16", id: "id4" }
+            { nome: "Lavar louça", data: "2025-08-15", id: "id1", concluida: false },
+            { nome: "Lavar banheiro", data: "2025-08-16", id: "id2", concluida: false },
+            { nome: "Estender roupa", data: "2025-08-17", id: "id3", concluida: false },
+            { nome: "Assistir o jogo do Corinthians", data: "2025-08-18", id: "id4", concluida: false }
         ];
+
+        let lixeira = JSON.parse(localStorage.getItem("lixeira")) || [];
+        let filtroAtual = "todas"; // controle de filtro
 
         let formatarData = (dataISO) => {
             return new Date(dataISO).toLocaleDateString("pt-BR");
         }
 
+        let pegarDiaSemana = (dataISO) => {
+            const dias = ["domingo", "segunda-feira", "terça-feira", "quarta-feira", "quinta-feira", "sexta-feira", "sábado"];
+            return dias[new Date(dataISO).getDay()];
+        }
+
         let salvar = () => {
             localStorage.setItem("afazeres", JSON.stringify(afazeres));
+            localStorage.setItem("lixeira", JSON.stringify(lixeira));
         }
 
         let adicionarTarefa = () => {
             const campoTarefa = document.getElementById("tarefa");
             const tarefa = campoTarefa.value;
-
             const campoData = document.getElementById("seleciona-data");
             const prazo = campoData.value;
 
@@ -48,18 +75,59 @@
             afazeres.push({
                 nome: tarefa,
                 data: prazo,
-                id: cron
+                id: cron,
+                concluida: false
             });
 
             salvar();
             campoTarefa.value = "";
             campoData.value = "";
-
             renderizar();
         }
 
         let apagarTarefa = (id) => {
-            afazeres = afazeres.filter(tarefa => tarefa.id !== id);x1
+            const tarefaRemovida = afazeres.find(t => t.id === id);
+            if (tarefaRemovida) {
+                lixeira.push(tarefaRemovida);
+                afazeres = afazeres.filter(tarefa => tarefa.id !== id);
+                salvar();
+                renderizar();
+                renderizarLixeira();
+            }
+        }
+
+        let restaurarTarefa = (id) => {
+            const tarefaRestaurada = lixeira.find(t => t.id === id);
+            if (tarefaRestaurada) {
+                afazeres.push(tarefaRestaurada);
+                lixeira = lixeira.filter(tarefa => tarefa.id !== id);
+                salvar();
+                renderizar();
+                renderizarLixeira();
+            }
+        }
+
+        let editarTarefa = (id) => {
+            const tarefa = afazeres.find(t => t.id === id);
+            const novoNome = prompt("Edite o nome da tarefa:", tarefa.nome);
+            const novaData = prompt("Edite a data (aaaa-mm-dd):", tarefa.data);
+            if (novoNome && novaData) {
+                tarefa.nome = novoNome;
+                tarefa.data = novaData;
+                salvar();
+                renderizar();
+            }
+        }
+
+        let alternarConcluida = (id) => {
+            const tarefa = afazeres.find(t => t.id === id);
+            tarefa.concluida = !tarefa.concluida;
+            salvar();
+            renderizar();
+        }
+
+        let filtroStatus = (status) => {
+            filtroAtual = status;
             renderizar();
         }
 
@@ -67,23 +135,124 @@
             const listaDeTarefas = document.getElementById("lista-de-tarefas");
             listaDeTarefas.innerHTML = "";
 
-            afazeres.forEach((tarefa) => {
-                const elemento = document.createElement("div");
-                elemento.style.cursor = "pointer"; // deixa parecer clicável
-                elemento.style.padding = "5px";
-                elemento.style.borderBottom = "1px solid #ccc";
-                
-                elemento.innerText = `${tarefa.nome} - ${formatarData(tarefa.data)}`;
+            // ordenar por data
+            afazeres.sort((a, b) => new Date(a.data) - new Date(b.data));
 
-                // ao clicar, apaga a tarefa inteira
-                elemento.onclick = () => apagarTarefa(tarefa.id);
+            // aplicar filtro
+            let listaFiltrada = afazeres;
+            if (filtroAtual === "pendentes") {
+                listaFiltrada = afazeres.filter(t => !t.concluida);
+            } else if (filtroAtual === "concluidas") {
+                listaFiltrada = afazeres.filter(t => t.concluida);
+            }
 
-                listaDeTarefas.appendChild(elemento);
+            listaFiltrada.forEach((tarefa) => {
+                const card = document.createElement("div");
+                card.className = "card";
+
+                // título
+                const titulo = document.createElement("div");
+                titulo.className = "titulo";
+                titulo.innerText = tarefa.nome;
+                if (tarefa.concluida) {
+                    titulo.style.textDecoration = "line-through";
+                    titulo.style.color = "gray";
+                }
+
+                // data
+                const data = document.createElement("div");
+                data.className = "data";
+                const diaSemana = pegarDiaSemana(tarefa.data);
+
+                let hoje = new Date();
+                hoje.setHours(0,0,0,0);
+                let dataTarefa = new Date(tarefa.data);
+
+                // atrasadas em vermelho
+                if (dataTarefa < hoje && !tarefa.concluida) {
+                    data.style.color = "red";
+                }
+
+                data.innerHTML = `${formatarData(tarefa.data)} (${diaSemana})`;
+
+                // botões
+                const btns = document.createElement("div");
+                btns.style.marginTop = "10px";
+
+                const btnConcluir = document.createElement("button");
+                btnConcluir.innerText = tarefa.concluida ? "Desmarcar" : "Concluir";
+                btnConcluir.onclick = (e) => { e.stopPropagation(); alternarConcluida(tarefa.id); };
+
+                const btnEditar = document.createElement("button");
+                btnEditar.innerText = "Editar";
+                btnEditar.style.marginLeft = "5px";
+                btnEditar.onclick = (e) => { e.stopPropagation(); editarTarefa(tarefa.id); };
+
+                const btnExcluir = document.createElement("button");
+                btnExcluir.innerText = "Excluir";
+                btnExcluir.style.marginLeft = "5px";
+                btnExcluir.onclick = (e) => { e.stopPropagation(); apagarTarefa(tarefa.id); };
+
+                btns.appendChild(btnConcluir);
+                btns.appendChild(btnEditar);
+                btns.appendChild(btnExcluir);
+
+                card.appendChild(titulo);
+                card.appendChild(data);
+                card.appendChild(btns);
+                listaDeTarefas.appendChild(card);
+            });
+
+            atualizarResumo();
+        }   
+
+        let renderizarLixeira = () => {
+            const listaLixeira = document.getElementById("lixeira");
+            listaLixeira.innerHTML = "";
+
+            lixeira.forEach((tarefa) => {
+                const card = document.createElement("div");
+                card.className = "card";
+
+                const titulo = document.createElement("div");
+                titulo.className = "titulo";
+                titulo.innerText = tarefa.nome;
+
+                const data = document.createElement("div");
+                data.className = "data";
+                const diaSemana = pegarDiaSemana(tarefa.data);
+                data.innerHTML = `${formatarData(tarefa.data)} (${diaSemana})`;
+
+                const btnRestaurar = document.createElement("button");
+                btnRestaurar.innerText = "Restaurar";
+                btnRestaurar.onclick = (e) => { e.stopPropagation(); restaurarTarefa(tarefa.id); };
+
+                card.appendChild(titulo);
+                card.appendChild(data);
+                card.appendChild(btnRestaurar);
+                listaLixeira.appendChild(card);
             });
         }
 
+        let atualizarResumo = () => {
+            const resumo = document.getElementById("resumo-semanal");
+
+            const hoje = new Date();
+            const inicioSemana = new Date(hoje);
+            inicioSemana.setDate(hoje.getDate() - hoje.getDay()); // domingo
+            const fimSemana = new Date(inicioSemana);
+            fimSemana.setDate(inicioSemana.getDate() + 6); // sábado
+
+            const tarefasSemana = afazeres.filter(t => {
+                const data = new Date(t.data);
+                return data >= inicioSemana && data <= fimSemana;
+            });
+
+            resumo.innerText = `Você tem ${tarefasSemana.length} tarefa(s) nesta semana`;
+        }
+
         renderizar();
+        renderizarLixeira();
     </script>
 </body>
-
 </html>
